@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Translator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+
+        .translator-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .language-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        select {
+            padding: 10px 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            background-color: white;
+        }
+
+        select:hover {
+            border-color: #667eea;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 0.95em;
+            resize: vertical;
+            min-height: 150px;
+            transition: border-color 0.3s;
+            line-height: 1.5;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .translate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-width: 150px;
+        }
+
+        .translate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .translate-btn:active {
+            transform: translateY(0);
+        }
+
+        .translate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .swap-btn {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .swap-btn:hover {
+            background-color: #e0e0e0;
+        }
+
+        .clear-btn {
+            background-color: #ff6b6b;
+            color: white;
+        }
+
+        .clear-btn:hover {
+            background-color: #ff5252;
+        }
+
+        .copy-btn {
+            background-color: #51cf66;
+            color: white;
+        }
+
+        .copy-btn:hover {
+            background-color: #40c057;
+        }
+
+        .status {
+            text-align: center;
+            height: 20px;
+            margin-bottom: 10px;
+            color: #667eea;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .error {
+            color: #ff6b6b;
+        }
+
+        .success {
+            color: #51cf66;
+        }
+
+        .char-count {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .translator-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .container {
+                padding: 25px;
+            }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Language Translator</h1>
+        <p class="subtitle">Translate text between multiple languages instantly</p>
+
+        <div class="translator-wrapper">
+            <div class="language-section">
+                <label for="sourceLang">From Language:</label>
+                <select id="sourceLang">
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="it">Italian</option>
+                    <option value="pt">Portuguese</option>
+                    <option value="ru">Russian</option>
+                    <option value="ja">Japanese</option>
+                    <option value="ko">Korean</option>
+                    <option value="zh">Chinese (Simplified)</option>
+                    <option value="ar">Arabic</option>
+                    <option value="hi">Hindi</option>
+                    <option value="nl">Dutch</option>
+                    <option value="pl">Polish</option>
+                    <option value="tr">Turkish</option>
+                    <option value="vi">Vietnamese</option>
+                    <option value="th">Thai</option>
+                    <option value="id">Indonesian</option>
+                    <option value="el">Greek</option>
+                    <option value="sv">Swedish</option>
+                </select>
+                <label for="sourceText">Text to Translate:</label>
+                <textarea id="sourceText" placeholder="Enter text here..."></textarea>
+                <div class="char-count"><span id="charCount">0</span> characters</div>
+            </div>
+
+            <div class="language-section">
+                <label for="targetLang">To Language:</label>
+                <select id="targetLang">
+                    <option value="es">Spanish</option>
+                    <option value="en">English</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="it">Italian</option>
+                    <option value="pt">Portuguese</option>
+                    <option value="ru">Russian</option>
+                    <option value="ja">Japanese</option>
+                    <option value="ko">Korean</option>
+                    <option value="zh">Chinese (Simplified)</option>
+                    <option value="ar">Arabic</option>
+                    <option value="hi">Hindi</option>
+                    <option value="nl">Dutch</option>
+                    <option value="pl">Polish</option>
+                    <option value="tr">Turkish</option>
+                    <option value="vi">Vietnamese</option>
+                    <option value="th">Thai</option>
+                    <option value="id">Indonesian</option>
+                    <option value="el">Greek</option>
+                    <option value="sv">Swedish</option>
+                </select>
+                <label for="targetText">Translated Text:</label>
+                <textarea id="targetText" placeholder="Translation will appear here..." disabled></textarea>
+                <div class="char-count"><span id="targetCharCount">0</span> characters</div>
+            </div>
+        </div>
+
+        <div class="status" id="status"></div>
+
+        <div class="controls">
+            <button class="translate-btn" id="translateBtn">🚀 Translate</button>
+            <button class="swap-btn" id="swapBtn">⇄ Swap Languages</button>
+            <button class="clear-btn" id="clearBtn">🗑️ Clear</button>
+            <button class="copy-btn" id="copyBtn">📋 Copy Result</button>
+        </div>
+    </div>
+
+    <script>
+        const sourceText = document.getElementById('sourceText');
+        const targetText = document.getElementById('targetText');
+        const sourceLang = document.getElementById('sourceLang');
+        const targetLang = document.getElementById('targetLang');
+        const translateBtn = document.getElementById('translateBtn');
+        const swapBtn = document.getElementById('swapBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const status = document.getElementById('status');
+        const charCount = document.getElementById('charCount');
+        const targetCharCount = document.getElementById('targetCharCount');
+
+        // Update character count
+        sourceText.addEventListener('input', () => {
+            charCount.textContent = sourceText.value.length;
+            status.textContent = '';
+        });
+
+        // Translate on button click
+        translateBtn.addEventListener('click', translate);
+
+        // Translate on Enter key
+        sourceText.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                translate();
+            }
+        });
+
+        // Swap languages and text
+        swapBtn.addEventListener('click', () => {
+            const tempLang = sourceLang.value;
+            sourceLang.value = targetLang.value;
+            targetLang.value = tempLang;
+
+            const tempText = sourceText.value;
+            sourceText.value = targetText.value;
+            targetText.value = tempText;
+
+            charCount.textContent = sourceText.value.length;
+            targetCharCount.textContent = targetText.value.length;
+            status.textContent = '';
+        });
+
+        // Clear all
+        clearBtn.addEventListener('click', () => {
+            sourceText.value = '';
+            targetText.value = '';
+            charCount.textContent = '0';
+            targetCharCount.textContent = '0';
+            status.textContent = '';
+        });
+
+        // Copy result
+        copyBtn.addEventListener('click', () => {
+            if (targetText.value.trim() === '') {
+                showStatus('Nothing to copy!', 'error');
+                return;
+            }
+
+            navigator.clipboard.writeText(targetText.value).then(() => {
+                showStatus('Copied to clipboard! ✓', 'success');
+                setTimeout(() => status.textContent = '', 2000);
+            }).catch(() => {
+                showStatus('Failed to copy', 'error');
+            });
+        });
+
+        async function translate() {
+            const text = sourceText.value.trim();
+
+            if (text === '') {
+                showStatus('Please enter some text to translate', 'error');
+                return;
+            }
+
+            if (sourceLang.value === targetLang.value) {
+                showStatus('Source and target languages must be different', 'error');
+                return;
+            }
+
+            showStatus('<span class="spinner"></span>Translating...', '');
+            translateBtn.disabled = true;
+
+            try {
+                const response = await fetch(
+                    `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang.value}|${targetLang.value}`
+                );
+
+                const data = await response.json();
+
+                if (data.responseStatus === 200) {
+                    targetText.value = data.responseData.translatedText;
+                    targetCharCount.textContent = data.responseData.translatedText.length;
+                    showStatus('Translation successful! ✓', 'success');
+                } else if (data.responseStatus === 429) {
+                    showStatus('Rate limit exceeded. Please wait a moment and try again.', 'error');
+                } else {
+                    showStatus('Translation failed. Check your input and try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus('Network error. Please check your connection.', 'error');
+            } finally {
+                translateBtn.disabled = false;
+            }
+        }
+
+        function showStatus(message, className) {
+            status.innerHTML = message;
+            status.className = 'status ' + className;
+        }
+    </script>
+</body>
+</html>
